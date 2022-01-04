@@ -4,7 +4,7 @@ import Counter, { SetCounter } from './components/counter';
 
 function App() {
   return (
-    <div>
+    <div className="App">
       <Counter />
       <SetCounter />
     </div>

@@ -1,6 +1,6 @@
 # React redux setup
 
-###[cheatsheet]
+[ Cheatsheet ]
 
 Disregard the folder structure and consider the following pointers:
 
