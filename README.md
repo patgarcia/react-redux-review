@@ -1,70 +1,62 @@
-# Getting Started with Create React App
+# React redux setup
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+###[cheatsheet]
 
-## Available Scripts
+Disregard the folder structure and consider the following pointers:
 
-In the project directory, you can run:
+- Make sure to install both libraries `npm install redux react-redux`
 
-### `npm start`
+## Redux setup
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Set your [actions](https://github.com/patgarcia/react-redux-review/blob/a97beac6d3d9572ba6a44701d28e60782a24ea14/src/actions.js#L1) and [action creators](https://github.com/patgarcia/react-redux-review/blob/a97beac6d3d9572ba6a44701d28e60782a24ea14/src/actions.js#L5)
+- Instantiate your [reducer](https://github.com/patgarcia/react-redux-review/blob/master/src/reducer.js) remembering to set an [initialState](https://github.com/patgarcia/react-redux-review/blob/a97beac6d3d9572ba6a44701d28e60782a24ea14/src/reducer.js#L3) and add a catch-all [return statment](https://github.com/patgarcia/react-redux-review/blob/a97beac6d3d9572ba6a44701d28e60782a24ea14/src/reducer.js#L15) for unmatched actions or errors
+- Create your redux [store](https://github.com/patgarcia/react-redux-review/blob/master/src/store.js) with an optional enhancer that activates [the redux devtools extension](https://github.com/patgarcia/react-redux-review/blob/a97beac6d3d9572ba6a44701d28e60782a24ea14/src/store.js#L5)
+- Setup a [redux provider](https://github.com/patgarcia/react-redux-review/blob/a97beac6d3d9572ba6a44701d28e60782a24ea14/src/index.js#L10) in `index.js`
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Within the component
 
-### `npm test`
+### Custom hooks approach
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Create a custom hook to encapsulate the [action-dispatch binding logic](https://github.com/patgarcia/react-redux-review/blob/master/src/use-actions.js) and another [counter custom hook](https://github.com/patgarcia/react-redux-review/blob/master/src/use-counter.js) to also get the store and return it alongside the bound action creators.
+- Call the counter hook inside the [Counter](https://github.com/patgarcia/react-redux-review/blob/a97beac6d3d9572ba6a44701d28e60782a24ea14/src/components/counter/Counter.jsx#L5) function component.
 
-### `npm run build`
+### Basic approach
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Hook to the store and dispatch directly from the function component
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```jsx
+// Inside Counter.jsx
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+// ... at imports level
+import { useSelector, useDispatch } from 'react-redux';
+import { decrement, increment, setVal } from './actions';
+import { bindActionCreators } from 'redux';
 
-### `npm run eject`
+// Inside function component
+// const Counter = () => { ...
+    // hook into the store
+    const count = useSelector(store => store.count); // assuming count is a valid key
+    // hook into redux dispatch
+    const dispatch = useDispatch();
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+    // Inside Counter's rendering section
+    // return (
+    //  <div>
+    // ...
+    // Display count value from redux store
+    <h2>{ count }</h2>
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+    // Dispatch action WITHOUT dispatch BINDING
+    <button onClick={() => dispatch(increment())}>increment</button>
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+You can bind the action creators with `dispatch` for added abstraction
 
-## Learn More
+```jsx
+    // bind action creators with dispatch
+    const actions = bindActionCreators({ decrement, increment, setVal }, dispatch)
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+    // Dispatch action WITH dispatch BINDING
+    <button onClick={() => actions.increment()}>increment</button>
+```
